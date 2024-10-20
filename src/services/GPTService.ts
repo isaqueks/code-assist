@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
-import { Project } from '../entity/Project';
 import { FunctionHandler } from '../handlers/FunctionHandler';
+import { SessionManager } from './SessionManager';
 import fs from 'fs/promises';
 import { TextContentBlock } from 'openai/resources/beta/threads/messages';
 
@@ -35,7 +35,6 @@ interface MessageBlock {
 export class GPTService {
 
   private readonly openAI: OpenAI;
-  private proj: Project;
 
   constructor(
     private readonly openAIToken: string,
@@ -46,17 +45,15 @@ export class GPTService {
     });
   }
 
-  public setProject(proj: Project): void {
-    this.proj = proj;
-  }
-
-  private async getThreadID(): Promise<string> {
-    if (!this.proj.threadId) {
-      const newThread = await this.openAI.beta.threads.create();
-      this.proj.threadId = newThread.id;
-      this.proj = await Project.repo.save(this.proj);
+  private async getThreadID(sessionManager: SessionManager): Promise<string> {
+    const existingThreadId = sessionManager.getThreadId();
+    if (existingThreadId) {
+      return existingThreadId;
     }
-    return this.proj.threadId;
+
+    const newThread = await this.openAI.beta.threads.create();
+    sessionManager.setThreadId(newThread.id);
+    return newThread.id;
   }
 
   private async handleRequiresAction(run: Run, thId: string, fh: FunctionHandler): Promise<void> {
@@ -107,8 +104,8 @@ export class GPTService {
     }
   }
 
-  public async ask(user: string, system?: string): Promise<string> {
-    const thId = await this.getThreadID();
+  public async ask(user: string, sessionManager: SessionManager): Promise<string> {
+    const thId = await this.getThreadID(sessionManager);
     const message = await this.openAI.beta.threads.messages.create(
       thId,
       {
@@ -124,7 +121,7 @@ export class GPTService {
       }
     ) as unknown as Run;
 
-    const fh = new FunctionHandler(this.proj.path);
+    const fh = new FunctionHandler('./'); // Provide the appropriate path
     await this.performRunCycle(thId, run, fh);
 
     const messages = await this.openAI.beta.threads.messages.list(thId);
