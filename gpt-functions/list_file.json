@@ -1,0 +1,23 @@
+{
+  "name": "list_files",
+  "description": "This function will list recursively the project directories and files. ./ is the project base directory!",
+  "strict": true,
+  "parameters": {
+    "type": "object",
+    "required": [
+      "path",
+      "recursive_depth"
+    ],
+    "properties": {
+      "path": {
+        "type": "string",
+        "description": "The root directory path from which to start the listing"
+      },
+      "recursive_depth": {
+        "type": "number",
+        "description": "The maximum depth of recursion for listing the directories and files"
+      }
+    },
+    "additionalProperties": false
+  }
+}

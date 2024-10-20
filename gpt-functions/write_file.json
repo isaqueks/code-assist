@@ -1,0 +1,23 @@
+{
+  "name": "write_file",
+  "description": "This function will write content to a file, overwriting all existing content. ./ is the project base directory!",
+  "strict": true,
+  "parameters": {
+    "type": "object",
+    "required": [
+      "file_path",
+      "content"
+    ],
+    "properties": {
+      "file_path": {
+        "type": "string",
+        "description": "The path to the file where content will be written. / is the project base!"
+      },
+      "content": {
+        "type": "string",
+        "description": "The content to be written to the file."
+      }
+    },
+    "additionalProperties": false
+  }
+}

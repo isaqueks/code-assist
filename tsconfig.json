@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "commonjs",
+        "rootDir": "../",
+        "outDir": "../build/backend/",
+        "esModuleInterop": true,
+        "strict": false,
+        "strictNullChecks": false,
+        "noImplicitAny": false,
+        "noImplicitThis": false,
+        "skipLibCheck": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "baseUrl": "."
+    },
+    "exclude": [
+        "tests",
+        "*.test.ts",
+       "migrations",
+        "*.d.ts"
+    ]
+}

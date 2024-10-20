@@ -1,0 +1,19 @@
+{
+  "name": "codeassist",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "kstart": "ts-node -r tsconfig-paths/register index.ts",
+    "start": "ts-node index.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "openai": "^4.68.1",
+    "sqlite3": "^5.1.7",
+    "typeorm": "^0.3.20"
+  }
+}

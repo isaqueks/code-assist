@@ -1,0 +1,23 @@
+{
+  "name": "shell_exec",
+  "description": "Executes a command via the shell and returns the output",
+  "strict": true,
+  "parameters": {
+    "type": "object",
+    "required": [
+      "command",
+      "working_directory"
+    ],
+    "properties": {
+      "command": {
+        "type": "string",
+        "description": "The command to be executed in the shell"
+      },
+      "working_directory": {
+        "type": "string",
+        "description": "The working directory for the command execution"
+      }
+    },
+    "additionalProperties": false
+  }
+}
