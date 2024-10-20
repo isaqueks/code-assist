@@ -1,5 +1,5 @@
 import fs from 'fs/promises';
-import { FileUtils } from './utility/FileUtils';
+import { FileUtils } from '../utilities/FileUtils';
 const pathModule = require('path');
 
 export class FunctionHandler {

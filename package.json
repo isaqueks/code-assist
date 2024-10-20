@@ -12,6 +12,8 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.4.5",
+    "marked": "^9.1.6",
+    "marked-terminal": "^7.1.0",
     "openai": "^4.68.1",
     "sqlite3": "^5.1.7",
     "typeorm": "^0.3.20"

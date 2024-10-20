@@ -1,6 +1,8 @@
 import AppDataSource from "./ormconfig";
-import { GPTService } from "./src/gpt";
+import { GPTService } from "./src/services/GPTService";
 import { Project } from "./src/entity/Project";
+import { marked } from 'marked';
+import TerminalRenderer from 'marked-terminal';
 
 const OPENAI_KEY = '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';
 const ASSISTANT_ID = 'asst_epuNl4Z2x9hl225KUc4mk9ll';
@@ -15,6 +17,11 @@ function prompt(text: string): Promise<string> {
     });
   });
 }
+
+marked.setOptions({
+  // Define o renderizador customizado como o renderer do terminal
+  renderer: new TerminalRenderer()
+});
 
 ;(async () => {
 
@@ -50,7 +57,7 @@ function prompt(text: string): Promise<string> {
       break;
     }
     const response = await gpt.ask(user);
-    console.log(`AI: ${response}`);
+    console.log(marked.parse(response));
   }
 
 })().catch(console.error);

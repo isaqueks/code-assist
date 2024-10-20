@@ -1,7 +1,8 @@
 import OpenAI from 'openai';
-import { Project } from './entity/Project';
-import { FunctionHandler } from './FunctionHandler';
+import { Project } from '../entity/Project';
+import { FunctionHandler } from '../handlers/FunctionHandler';
 import fs from 'fs/promises';
+import { TextContentBlock } from 'openai/resources/beta/threads/messages';
 
 const backlog = (content: string): Promise<void> => {
   return fs.appendFile('backlog.txt', String(content) + '\n');
@@ -127,8 +128,8 @@ export class GPTService {
     await this.performRunCycle(thId, run, fh);
 
     const messages = await this.openAI.beta.threads.messages.list(thId);
-    const lastMessage = messages.data[0].content[0] as unknown as MessageBlock;
+    const lastMessage = messages.data[0].content[0] as TextContentBlock;
 
-    return lastMessage.content.join('\n');
+    return lastMessage.text.value;
   }
 }
