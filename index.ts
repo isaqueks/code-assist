@@ -2,6 +2,7 @@ import AppDataSource from "./ormconfig";
 import { GPTService } from "./src/services/GPTService";
 import { SessionManager } from "./src/services/SessionManager";
 import { Project } from "./src/entity/Project";
+import { FunctionHandler } from "./src/handlers/FunctionHandler";
 import marked from 'marked';
 import TerminalRenderer from 'marked-terminal';
 
@@ -9,7 +10,6 @@ const OPENAI_KEY = 'sk-proj-LD9_wdZT4CeKFc6jnp5tSJ-6wlM0HaLzmYP8Afb-qTiALWnahb90
 const ASSISTANT_ID = 'asst_epuNl4Z2x9hl225KUc4mk9ll';
 
 const sessionManager = new SessionManager();
-const gpt = new GPTService(OPENAI_KEY, ASSISTANT_ID);
 
 function prompt(text: string): Promise<string> {
   process.stdout.write(text);
@@ -44,6 +44,17 @@ marked.setOptions({
   }
 
   sessionManager.setThreadId(proj.threadId);
+
+    // Define um dicionário de funções
+  const functionHandler = new FunctionHandler(proj.path); // Utilize o caminho apropriado
+  const functionsDictionary = {
+    shell_exec: functionHandler.shell_exec.bind(functionHandler),
+    list_files: functionHandler.list_files.bind(functionHandler),
+    read_file: functionHandler.read_file.bind(functionHandler),
+    write_file: functionHandler.write_file.bind(functionHandler),
+  };
+
+  const gpt = new GPTService(OPENAI_KEY, ASSISTANT_ID, functionsDictionary);
 
   while(true) {
     const user = await prompt('You: ');

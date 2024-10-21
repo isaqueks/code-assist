@@ -1,5 +1,4 @@
 import OpenAI from 'openai';
-import { FunctionHandler } from '../handlers/FunctionHandler';
 import { SessionManager } from './SessionManager';
 import fs from 'fs/promises';
 import { TextContentBlock } from 'openai/resources/beta/threads/messages';
@@ -32,6 +31,8 @@ interface MessageBlock {
   content: string[];
 }
 
+type FunctionDictionary = { [name: string]: (args: any) => Promise<any> };
+
 export class GPTService {
 
   private readonly openAI: OpenAI;
@@ -39,6 +40,7 @@ export class GPTService {
   constructor(
     private readonly openAIToken: string,
     private readonly assistantID: string,
+    private readonly functions: FunctionDictionary
   ) {
     this.openAI = new OpenAI({
       apiKey: openAIToken,
@@ -56,17 +58,17 @@ export class GPTService {
     return newThread.id;
   }
 
-  private async handleRequiresAction(run: Run, thId: string, fh: FunctionHandler): Promise<void> {
+  private async handleRequiresAction(run: Run, thId: string): Promise<void> {
     const outs: { tool_call_id: string; output: string; }[] = [];
 
     for (const tool of run.required_action!.submit_tool_outputs.tool_calls) {
-      const fn = fh[tool.function.name].bind(fh) as (args: any) => Promise<any>;
+      const fn = this.functions[tool.function.name];
       if (!fn) {
         throw new Error(`Unknown tool: ${tool.function.name}`);
       }
 
       const args = JSON.parse(tool.function.arguments);
-      backlog(`${fn.name}(${JSON.stringify(args)})`);
+      backlog(`${tool.function.name}(${JSON.stringify(args)})`);
 
       let output: any;
       try {
@@ -90,14 +92,14 @@ export class GPTService {
     );
   }
 
-  private async performRunCycle(thId: string, run: Run, fh: FunctionHandler): Promise<void> {
+  private async performRunCycle(thId: string, run: Run): Promise<void> {
     while (run.status !== 'completed') {
       if (run.status === 'failed') {
         console.error(run.last_error);
         throw new Error('Run failed');
       }
       if (run.status === 'requires_action') {
-        await this.handleRequiresAction(run, thId, fh);
+        await this.handleRequiresAction(run, thId);
       }
       run = await this.openAI.beta.threads.runs.retrieve(thId, run.id) as unknown as Run;
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -121,8 +123,7 @@ export class GPTService {
       }
     ) as unknown as Run;
 
-    const fh = new FunctionHandler('./'); // Provide the appropriate path
-    await this.performRunCycle(thId, run, fh);
+    await this.performRunCycle(thId, run);
 
     const messages = await this.openAI.beta.threads.messages.list(thId);
     const lastMessage = messages.data[0].content[0] as TextContentBlock;
